@@ -1,0 +1,21 @@
+@font-face {
+  font-family: 'RetroFont';
+  src: url('../font/PressStart2P-Regular.ttf');
+}
+
+* {
+  color: #F1F6F9;
+}
+
+h1 {
+  font-family: 'RetroFont';
+  text-align: center;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+body {
+  background-color: #212A3E;
+  display: flex;
+  justify-content: center;
+}
