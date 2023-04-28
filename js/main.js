@@ -100,17 +100,22 @@ class Maze {
     * Retorna lista de adjacência com todas as células
     * usando como base a matriz de células `this.cells`
     */
-    grafo = [];
+    grafo = Array(this.cells_vertical * this.cells_horizontal);
+    let c = 0;
     for(let i=0; i < this.cells_vertical; i++) {
       for(let j=0; j < this.cells_horizontal; j++) {
         // Varre todos os adjacêntes a célula
         current_cell = this.get_cell(i, j);
         if(current_cell.is_obstacle()) continue;
+        adjacent = []
         
         // Vértice direita
-        if(current_cell.get_cell(i, j+1).is_obstacle() == false) {
-          // grafo[]
+        if(this.get_cell(i, j+1).is_obstacle() == false) {
+          adjacent.push(this.get_cell(i, j+1));
         }
+
+        grafo[c] = adjacent;
+        c++;
       }
     }
     return grafo;
