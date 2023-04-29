@@ -1,6 +1,13 @@
 import Cell from "./Cell.js"
+import Bomb from "./Bomb.js"
 import Character from "./Charactere.js";
 import MAP from "./Scene1.js";
+
+const RIGHT  = 68;
+const LEFT   = 65;
+const BOTTOM = 83;
+const TOP    = 87;
+const SPACE  = 32;
 
 export class Point {
   constructor(id, line, column) {
@@ -11,59 +18,7 @@ export class Point {
 }
 
 
-class Bomb {
-  constructor(point, canvas) {
-    this.point = point;
-    this.canvas = canvas;
-    this.trails = [];
-    this.time_explosion = Date.now() + 3000; // tempo até explodir
-    this.time_trail_hide = this.time_explosion + 1000;
-  }
-
-  has_exploded() {
-    if(this.time_explosion - Date.now() > 0) {
-      return false;
-    }
-    return true;
-  }
-
-
-  trail_has_gone() {
-    if(this.time_trail_hide - Date.now() > 0) {
-      return false;
-    }
-    return true;
-  }
-
-
-  draw_trails(trail) {
-    this.trails = trail;
-
-    for(let i=0; i < trail.length; i++) {
-      // Mostra sprite de bomba
-      const {line, column} = trail[i];
-      this.canvas.fill("#FFF000")
-      this.canvas.circle(
-        column * 40 + 20,
-        line   * 40 + 20,
-        40*0.75)
-    }
-  }
-
-  draw() {
-    // Mostra sprite de bomba
-    console.log("sprite")
-    const {line, column} = this.point;
-    this.canvas.fill("#FF0000")
-    this.canvas.circle(
-      column * 40 + 20,
-      line   * 40 + 20,
-      40*0.75)
-  }
-}
-
-
-function create_cell(type, point) {
+function create_cell(type, point, maze) {
   /*
   * Gera uma célula apartir de um número inteiro `type`
   * 0 = região livre para
@@ -85,6 +40,7 @@ function create_cell(type, point) {
     case 2:
       return new Cell(point, "obstacle");
     case 3:
+      maze.charactere = new Character(point)
       return new Character(point);
     case 4:
       return new Cell(point);
@@ -94,10 +50,11 @@ function create_cell(type, point) {
 
 export default class Maze {
   
-  constructor(canvas, width, height) {
+  constructor(canvas, width, height, font) {
     this.canvas = canvas;
     this.width  = width;
     this.height = height;
+    this.font   = font;
     this.cells_vertical   = 13;
     this.cells_horizontal = 16;
     this.cell_size = 40;
@@ -105,7 +62,7 @@ export default class Maze {
     this.charactere = null;
     this.cells = Array(this.cells_vertical);
     this.show_lables = false;
-    
+    this.is_game_running = true;
     this.validate_canvas_size();
     this.load_maze_from_matrix(MAP);
   }
@@ -131,7 +88,7 @@ export default class Maze {
     for(let i=0; i < this.cells_vertical; i++) {
       let line = Array(this.cells_horizontal);
       for(let j=0; j < this.cells_horizontal; j++) {
-        line[j] = create_cell(matrix[i][j], new Point(id, i, j), this.cells);
+        line[j] = create_cell(matrix[i][j], new Point(id, i, j), this);
         id++;
       }
       this.cells[i] = line;
@@ -201,7 +158,7 @@ export default class Maze {
   explosion(point) {
     let {line, column} = point;
     // quantidade de blocos que serão afetados na vertical/horizontal
-    let propagation = 4;
+    let propagation = 2;
     let points = [];
     let p;
 
@@ -218,7 +175,7 @@ export default class Maze {
     
     // horizontal - direita
     let right = Math.min(this.cells_horizontal, column+propagation);
-    for(let j=column; j >= right; j++) {
+    for(let j=column; j <= right; j++) {
       p = new Point(this.calculate_id(line, j), line, j);
       if(!this.get_cell(line, j).can_break()) {
         break;
@@ -250,16 +207,32 @@ export default class Maze {
     }
 
     for(let i=0; i < points.length; i++) {
-      this.set_cell(points[i], 0);
+      this.hit_detection(points[i])
+      this.set_cell_from_type(points[i], 0);
     }
     
     return points;
   }
 
 
-  set_cell(point, type) {
+  hit_detection(point) {
+    // Detecta se houve colisão com player ou inimigo
+    if(this.charactere.point.id == point.id) {
+      this.is_game_running = false;
+    } 
+  }
+
+
+  set_cell_from_type(point, type) {
     const {line, column} = point;
     this.cells[line][column] = create_cell(type, point);
+    this.render_cell(line, column);
+  }
+
+  
+  set_cell(point, cell) {
+    const {line, column} = point;
+    this.cells[line][column] = cell;
     this.render_cell(line, column);
   }
 
@@ -269,18 +242,78 @@ export default class Maze {
   }
 
 
+  get_point(line, column) {
+    return new Point(this.calculate_id(line, column), line, column);
+  }
+
+
   get_cell(line, column) {
     return this.cells[line][column];
   }
 
-
   listen_keyboard_event() {
-    console.log("OI!");
-    this.add_bomb(new Point(68, 3, 4))
+    if(this.canvas.keyCode == SPACE) { // BARRA DE ESPAÇO
+      this.add_bomb(this.charactere.point);
+    }
+
+    this.handle_moviment();
+  }
+
+  is_valid_position(line, column) {
+    if(line < 0 || line > this.cells_vertical) {
+      return false;
+    }
+    if(column < 0 || column > this.cells_horizontal) {
+      return false;
+    }
+    return true;
+  }
+
+
+  handle_moviment() {
+    // Função que lida com a movimentação do personagem
+    let {line, column} = this.charactere.point;
+    let n_line   = line;
+    let n_column = column;
+
+    if(this.canvas.keyIsDown(RIGHT)) {
+      n_column++;
+    }
+    if(this.canvas.keyIsDown(LEFT)) {
+      n_column--;
+    }
+    if(this.canvas.keyIsDown(TOP)) {
+      n_line--;
+    }
+    if(this.canvas.keyIsDown(BOTTOM)) {
+      n_line++;
+    }
+    
+    if(!this.is_valid_position(n_line, n_column)) {
+      return;
+    }
+
+    let next_point = this.get_point(n_line, n_column);
+    if(this.get_cell(next_point.line, next_point.column).type == "available-path") {
+      this.set_cell_from_type(this.charactere.point, 0);
+      this.set_cell(next_point, this.charactere);
+      this.charactere.point = next_point;
+    }
   }
 
 
   update() {
+    if(!this.is_game_running) {
+      let font_size = 60;
+      let text = "GAME OVER";
+      this.canvas.textSize(font_size);
+      this.canvas.textFont(this.font);
+      this.canvas.stroke(1);
+      this.canvas.fill(this.canvas.color(255, 255, 255));
+      this.canvas.text(text, this.width/2 - (text.length * font_size) / 2, this.height/2);
+      return;
+    } 
+
     for(let i=0; i < this.bombs.length; i++) {
       if(this.bombs[i].has_exploded()) {
         // Bomba acabou de explodir
@@ -297,7 +330,7 @@ export default class Maze {
       if(this.bombs[i].trail_has_gone()) {
         let trails = this.bombs[i].trails;
         for(let i=0; i < trails.length; i++) {
-          this.set_cell(trails[i], 0);          
+          this.set_cell_from_type(trails[i], 0);          
         }
         this.bombs.shift();
       }
