@@ -8,6 +8,8 @@ const LEFT   = 65;
 const BOTTOM = 83;
 const TOP    = 87;
 const SPACE  = 32;
+const DEBUG_KEY = 76;
+
 
 export class Point {
   constructor(id, line, column) {
@@ -104,24 +106,42 @@ export default class Maze {
   }
 
 
-  // TODO
   get_adjacent_list() {
     /*
     * Retorna lista de adjacência com todas as células
     * usando como base a matriz de células `this.cells`
     */
-    grafo = Array(this.cells_vertical * this.cells_horizontal);
+    let grafo = Array(this.cells_vertical * this.cells_horizontal);
     let c = 0;
     for(let i=0; i < this.cells_vertical; i++) {
       for(let j=0; j < this.cells_horizontal; j++) {
         // Varre todos os adjacêntes a célula
-        current_cell = this.get_cell(i, j);
+        let current_cell = this.get_cell(i, j);
         if(current_cell.is_obstacle()) continue;
-        adjacent = []
         
+        let adjacent = []
         // Vértice direita
-        if(this.get_cell(i, j+1).is_obstacle() == false) {
-          adjacent.push(this.get_cell(i, j+1));
+        let right = j+1;
+        if(right <= this.cells_horizontal && this.get_cell(i, right).is_obstacle() == false) {
+          adjacent.push(this.get_cell(i, right));
+        }
+        
+        // Vértice esquerda
+        let left = j-1;
+        if(left >= 0 && this.get_cell(i, left).is_obstacle() == false) {
+          adjacent.push(this.get_cell(i, left));
+        }
+        
+        // Vértice cima
+        let up = i-1;
+        if(up >= 0 && this.get_cell(up, j).is_obstacle() == false) {
+          adjacent.push(this.get_cell(up, j));
+        }
+        
+        // Vértice baixo
+        let bottom = i+1;
+        if(bottom <= this.cells_vertical && this.get_cell(bottom, j).is_obstacle() == false) {
+          adjacent.push(this.get_cell(bottom, j));
         }
 
         grafo[c] = adjacent;
@@ -252,8 +272,13 @@ export default class Maze {
   }
 
   listen_keyboard_event() {
-    if(this.canvas.keyCode == SPACE) { // BARRA DE ESPAÇO
+    if(this.canvas.keyCode == SPACE) {
       this.add_bomb(this.charactere.point);
+    }
+    if(this.canvas.keyCode == DEBUG_KEY) {
+      this.show_lables = !this.show_lables;
+      this.render_maze();
+      console.table(this.get_adjacent_list());
     }
 
     this.handle_moviment();
@@ -276,19 +301,21 @@ export default class Maze {
     let n_line   = line;
     let n_column = column;
 
-    if(this.canvas.keyIsDown(RIGHT)) {
-      n_column++;
+    switch(this.canvas.keyCode) {
+      case RIGHT:
+        n_column++;
+        break;  
+      case LEFT:
+        n_column--;
+        break;
+      case TOP:
+        n_line--;
+        break;
+      case BOTTOM:
+        n_line++;
+        break;
     }
-    if(this.canvas.keyIsDown(LEFT)) {
-      n_column--;
-    }
-    if(this.canvas.keyIsDown(TOP)) {
-      n_line--;
-    }
-    if(this.canvas.keyIsDown(BOTTOM)) {
-      n_line++;
-    }
-    
+
     if(!this.is_valid_position(n_line, n_column)) {
       return;
     }
