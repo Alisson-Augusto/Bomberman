@@ -1,8 +1,8 @@
 import Cell from "./Cell.js"
 
 export default class Character extends Cell {
-  constructor(id) {
-    super(id, "charactere");
+  constructor(point) {
+    super(point, "charactere");
   }    
 
   get_color() {

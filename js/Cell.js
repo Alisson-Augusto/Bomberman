@@ -1,11 +1,13 @@
+import { Point } from "./Maze.js";
+
 export default class Cell {
-  constructor(id, type) {
-    this.id = id;
+  constructor(point, type) {
+    this.point = point;
     this.type = type;
   }
 
   get_id() {
-    return this.id;
+    return this.point.id;
   }
 
   set_type(type) {
@@ -29,5 +31,9 @@ export default class Cell {
 
   is_obstacle() {
     return this.type == "obstacle" || this.type == "fixed-obstacle";
+  }
+
+  can_break() {
+    return this.type != "fixed-obstacle";
   }
 }

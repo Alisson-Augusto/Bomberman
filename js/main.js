@@ -17,7 +17,7 @@ let canvas = new p5(function(p5) {
   }
 
   p5.draw = function draw() {
-    maze.render_maze();
+    maze.update();
   }
   
   p5.keyPressed = function keyPressed() {
