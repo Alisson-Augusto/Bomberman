@@ -1,6 +1,7 @@
 import Cell from "./Cell.js"
 import Bomb from "./Bomb.js"
 import Character from "./Charactere.js";
+import Enemy from "./Enemy.js";
 import MAP from "./Scene1.js";
 
 const RIGHT  = 68;
@@ -43,9 +44,11 @@ function create_cell(type, point, maze) {
       return new Cell(point, "obstacle");
     case 3:
       maze.charactere = new Character(point)
-      return new Character(point);
+      return maze.charactere;
     case 4:
-      return new Cell(point);
+      let enemy = new Enemy(point)
+      maze.enemies.push(enemy)
+      return enemy;
   }
 }
 
@@ -61,6 +64,7 @@ export default class Maze {
     this.cells_horizontal = 16;
     this.cell_size = 40;
     this.bombs = [];
+    this.enemies = [];
     this.charactere = null;
     this.cells = Array(this.cells_vertical);
     this.show_lables = false;
@@ -170,6 +174,12 @@ export default class Maze {
 
   
   add_bomb(point) {
+    // Valida se já existe uma bomba na posição
+    for(let i=0; i < this.bombs.length; i++) {
+      if(this.bombs[i].point.id === point.id) {
+        return;
+      }
+    }
     let bomb = new Bomb(point, this.canvas);
     this.bombs.push(bomb);
   }
@@ -362,5 +372,9 @@ export default class Maze {
         this.bombs.shift();
       }
     }
+
+    for(let i=0; i < this.enemies.length; i++) {
+      // TODO: IMPLEMENTAR MOVIMENTAÇÃO DOS INIMIGOS
+    } 
   }
 }
