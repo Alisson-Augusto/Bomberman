@@ -11,15 +11,16 @@ const BOTTOM = 83;
 const TOP    = 87;
 const SPACE  = 32;
 const DEBUG_KEY = 76;
-
+const CELLS_VERTICAL   = 13;
+const CELLS_HORIZONTAL = 16;
 
 export class Point {
   id: number;
   line: number;
   column: number;
 
-  constructor(id: number, line: number, column: number) {
-    this.id     = id;
+  constructor(line: number, column: number) {
+    this.id     = line*CELLS_HORIZONTAL + column;
     this.line   = line;
     this.column = column;
   }
@@ -65,8 +66,6 @@ export default class Bomberman {
   width: number;
   height: number;
   font: string;
-  cells_vertical: number;
-  cells_horizontal: number;
   cell_size: number;
   bombs: Array<Bomb>;
   enemies: Array<Enemy>;
@@ -81,13 +80,11 @@ export default class Bomberman {
     this.width  = width;
     this.height = height;
     this.font   = font;
-    this.cells_vertical   = 13;
-    this.cells_horizontal = 16;
     this.cell_size = 40;
     this.bombs = [];
     this.enemies = [];
     this.player = undefined;
-    this.cells = Array(this.cells_vertical);
+    this.cells = Array(CELLS_VERTICAL);
     this.show_lables = false;
     this.is_game_running = true;
     this.validate_canvas_size();
@@ -97,8 +94,8 @@ export default class Bomberman {
 
 
   validate_canvas_size() {
-    let expected_widht  = this.cell_size * this.cells_horizontal;
-    let expected_height = this.cell_size * this.cells_vertical;
+    let expected_widht  = this.cell_size * CELLS_HORIZONTAL;
+    let expected_height = this.cell_size * CELLS_VERTICAL;
 
     if(expected_widht != this.width || expected_height != this.height) {
       console.error("Dimensões do canvas incompatível");
@@ -122,16 +119,16 @@ export default class Bomberman {
 
   load_maze_from_matrix(matrix: Array<Array<number>>) {
     // Carrega mapa apartir de uma matriz de inteiros
-    if(matrix.length != this.cells_vertical || matrix[0].length != this.cells_horizontal) {
+    if(matrix.length != CELLS_VERTICAL || matrix[0].length != CELLS_HORIZONTAL) {
       console.error("Matriz de tamanho incompatível")
       return;
     }
     
     let id = 0;
-    for(let i=0; i < this.cells_vertical; i++) {
-      let line = Array(this.cells_horizontal);
-      for(let j=0; j < this.cells_horizontal; j++) {
-        line[j] = create_cell(matrix[i][j], new Point(id, i, j), this);
+    for(let i=0; i < CELLS_VERTICAL; i++) {
+      let line = Array(CELLS_HORIZONTAL);
+      for(let j=0; j < CELLS_HORIZONTAL; j++) {
+        line[j] = create_cell(matrix[i][j], new Point(i, j), this);
         id++;
       }
       this.cells[i] = line;
@@ -140,8 +137,8 @@ export default class Bomberman {
 
 
   render_maze() {
-    for(let i=0; i < this.cells_vertical; i++) {
-      for(let j=0; j < this.cells_horizontal; j++) {
+    for(let i=0; i < CELLS_VERTICAL; i++) {
+      for(let j=0; j < CELLS_HORIZONTAL; j++) {
         this.render_cell(i, j);
       }
     }
@@ -153,10 +150,10 @@ export default class Bomberman {
     * Retorna lista de adjacência com todas as células
     * usando como base a matriz de células `this.cells`
     */
-    let grafo = Array(this.cells_vertical * this.cells_horizontal);
+    let grafo = Array(CELLS_VERTICAL * CELLS_HORIZONTAL);
     let c = 0;
-    for(let i=0; i < this.cells_vertical; i++) {
-      for(let j=0; j < this.cells_horizontal; j++) {
+    for(let i=0; i < CELLS_VERTICAL; i++) {
+      for(let j=0; j < CELLS_HORIZONTAL; j++) {
         // Varre todos os adjacêntes a célula
         let current_cell = this.get_cell(i, j);
         if(current_cell.is_obstacle()) continue;
@@ -164,7 +161,7 @@ export default class Bomberman {
         let adjacent = []
         // Vértice direita
         let right = j+1;
-        if(right <= this.cells_horizontal && this.get_cell(i, right).is_obstacle() == false) {
+        if(right <= CELLS_HORIZONTAL && this.get_cell(i, right).is_obstacle() == false) {
           adjacent.push(this.get_cell(i, right));
         }
         
@@ -182,7 +179,7 @@ export default class Bomberman {
         
         // Vértice baixo
         let bottom = i+1;
-        if(bottom <= this.cells_vertical && this.get_cell(bottom, j).is_obstacle() == false) {
+        if(bottom <= CELLS_VERTICAL && this.get_cell(bottom, j).is_obstacle() == false) {
           adjacent.push(this.get_cell(bottom, j));
         }
 
@@ -200,15 +197,16 @@ export default class Bomberman {
       console.info("inimigo sem alvo");  
       return path;
     }
-    
+
+    // TODO: Implementar DIJKSTRA para gerar path
     path = [
-      this.get_point(1, 13),
-      this.get_point(1, 12),
-      this.get_point(1, 11),
-      this.get_point(1, 10),
-      this.get_point(2, 10),
-      this.get_point(3, 10),
-      this.get_point(4, 10),
+      new Point(1, 13),
+      new Point(1, 12),
+      new Point(1, 11),
+      new Point(1, 10),
+      new Point(2, 10),
+      new Point(3, 10),
+      new Point(4, 10),
     ]
     
     return path;
@@ -254,7 +252,7 @@ export default class Bomberman {
     // horizontal - esquerda
     let left  = Math.max(0, column-propagation);
     for(let j=column; j >= left; j--) {
-      p = new Point(this.calculate_id(line, j), line, j);
+      p = new Point(line, j);
       if(!this.get_cell(line, j).can_break()) {
         break;
       }
@@ -263,9 +261,9 @@ export default class Bomberman {
     }
     
     // horizontal - direita
-    let right = Math.min(this.cells_horizontal, column+propagation);
+    let right = Math.min(CELLS_HORIZONTAL, column+propagation);
     for(let j=column; j <= right; j++) {
-      p = new Point(this.calculate_id(line, j), line, j);
+      p = new Point(line, j);
       if(!this.get_cell(line, j).can_break()) {
         break;
       }
@@ -276,7 +274,7 @@ export default class Bomberman {
     // vertical - cima
     let up = Math.max(0, line-propagation);
     for(let i=line; i >= up; i--) {
-      p = new Point(this.calculate_id(i, column), i, column);
+      p = new Point(i, column);
       if(!this.get_cell(i, column).can_break()) {
         break;
       }
@@ -285,9 +283,9 @@ export default class Bomberman {
     }
     
     // vertical - baixo
-    let down = Math.min(this.cells_vertical, line+propagation);
+    let down = Math.min(CELLS_VERTICAL, line+propagation);
     for(let i=line; i <= down; i++) {
-      p = new Point(this.calculate_id(i, column), i, column);
+      p = new Point(i, column);
       if(!this.get_cell(i, column).can_break()) {
         break;
       }
@@ -326,16 +324,6 @@ export default class Bomberman {
   }
 
 
-  calculate_id(line: number, column: number) {
-    return line*this.cells_horizontal + column; 
-  }
-
-
-  get_point(line: number, column: number) {
-    return new Point(this.calculate_id(line, column), line, column);
-  }
-
-
   get_cell(line:number, column:number) {
     return this.cells[line][column];
   }
@@ -371,10 +359,10 @@ export default class Bomberman {
 
   is_valid_position(line: number, column: number) {
     /* Valida se posição esta dentro do tabuleiro */
-    if(line < 0 || line > this.cells_vertical) {
+    if(line < 0 || line > CELLS_VERTICAL) {
       return false;
     }
-    if(column < 0 || column > this.cells_horizontal) {
+    if(column < 0 || column > CELLS_HORIZONTAL) {
       return false;
     }
     return true;
@@ -403,7 +391,7 @@ export default class Bomberman {
         break;
     }
 
-    let next_point = this.get_point(n_line, n_column);
+    let next_point = new Point(n_line, n_column);
     if(this.is_valid_move(next_point)) {
       this.set_cell_from_type(this.player.point, 0);
       this.set_cell(next_point, this.player);
