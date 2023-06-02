@@ -46,7 +46,7 @@ function create_cell(type, point, maze) {
       maze.charactere = new Character(point)
       return maze.charactere;
     case 4:
-      let enemy = new Enemy(point)
+      let enemy = new Enemy(point, maze.canvas);
       maze.enemies.push(enemy)
       return enemy;
   }
@@ -71,7 +71,9 @@ export default class Maze {
     this.is_game_running = true;
     this.validate_canvas_size();
     this.load_maze_from_matrix(MAP);
+    this.init_enemies();
   }
+
 
   validate_canvas_size() {
     let expected_widht  = this.cell_size * this.cells_horizontal;
@@ -82,6 +84,18 @@ export default class Maze {
       console.error(`Dimensões esperadas: (${expected_widht}x${expected_height})`);
     }
   }
+
+
+  init_enemies() {
+    /* Inicializa inimigos, definindo alvos */
+    for(let i=0; i < this.enemies.length; i++) {
+      this.enemies[i].set_target(this.charactere.point);
+      this.enemies[i].set_path(
+        this.generate_path_from_enemy_to_target(this.enemies[i])
+      )
+    }
+  }
+
 
   load_maze_from_matrix(matrix) {
     // Carrega mapa apartir de uma matriz de inteiros
@@ -100,6 +114,7 @@ export default class Maze {
       this.cells[i] = line;
     }
   }
+
 
   render_maze() {
     for(let i=0; i < this.cells_vertical; i++) {
@@ -153,6 +168,27 @@ export default class Maze {
       }
     }
     return grafo;
+  }
+
+
+  generate_path_from_enemy_to_target(enemy) {
+    let path = [];
+    if(enemy.target == null) { 
+      console.info("inimigo sem alvo");  
+      return path;
+    }
+    
+    path = [
+      this.get_point(1, 13),
+      this.get_point(1, 12),
+      this.get_point(1, 11),
+      this.get_point(1, 10),
+      this.get_point(2, 10),
+      this.get_point(3, 10),
+      this.get_point(4, 10),
+    ]
+    
+    return path;
   }
 
 
@@ -281,6 +317,7 @@ export default class Maze {
     return this.cells[line][column];
   }
 
+
   listen_keyboard_event() {
     if(this.canvas.keyCode == SPACE) {
       this.add_bomb(this.charactere.point);
@@ -294,7 +331,21 @@ export default class Maze {
     this.handle_moviment();
   }
 
+  is_valid_move(position) {
+    /* Valida se ator pode se mover para essa célula */
+    if(this.is_valid_position(position.line, position.column) == false) {
+      return false;
+    }
+
+    if(this.get_cell(position.line, position.column).type == "available-path") {
+      return true;
+    }
+
+    return false;
+  }
+
   is_valid_position(line, column) {
+    /* Valida se posição esta dentro do tabuleiro */
     if(line < 0 || line > this.cells_vertical) {
       return false;
     }
@@ -326,12 +377,8 @@ export default class Maze {
         break;
     }
 
-    if(!this.is_valid_position(n_line, n_column)) {
-      return;
-    }
-
     let next_point = this.get_point(n_line, n_column);
-    if(this.get_cell(next_point.line, next_point.column).type == "available-path") {
+    if(this.is_valid_move(next_point)) {
       this.set_cell_from_type(this.charactere.point, 0);
       this.set_cell(next_point, this.charactere);
       this.charactere.point = next_point;
@@ -374,7 +421,13 @@ export default class Maze {
     }
 
     for(let i=0; i < this.enemies.length; i++) {
-      // TODO: IMPLEMENTAR MOVIMENTAÇÃO DOS INIMIGOS
+      let position = this.enemies[i].get_next_moviment()
+      if(position == null || !this.is_valid_position(position)) continue;
+      console.log(position);
+
+      this.set_cell_from_type(this.enemies[i].point, 0);
+      this.set_cell(position, this.enemies[i]);
+      this.enemies[i].point = position;
     } 
   }
 }

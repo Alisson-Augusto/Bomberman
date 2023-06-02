@@ -16,6 +16,11 @@ export default class Bomb {
 
 
   trail_has_gone() {
+    /*
+      Valida se o tempo de explosão já superou
+      o tempo programado, de forma que retornará verdadeiro
+      quando o "rastro" de explosão já tiver partido.
+    */
     if(this.time_trail_hide - Date.now() > 0) {
       return false;
     }

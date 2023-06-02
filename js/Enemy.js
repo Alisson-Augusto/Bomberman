@@ -1,23 +1,31 @@
 import Cell from "./Cell.js"
 
+// Define quantidade de frames necessário para liberar movimentação
+const FRAMES_BETWEEN_MOVEMENT = 60;
+
 export default class Enemy extends Cell {
-  constructor(point, adjacent_list) {
+  constructor(point, canvas, target=null) {
     super(point, "enemy");
-    this.adjacent_list = adjacent_list;
     this.path = []; // Lista com os caminhos que o inimigo deve seguir para chegar no player
+    this.target = target;
+    this.canvas = canvas;
   }
 
-  set_adjacent_list(adjacent_list) {
-    this.adjacent_list = adjacent_list;
+  set_path(path) {
+    this.path = path;
   }
 
-  generate_path() {
-
+  set_target(target) {
+    this.target = target;
   }
 
   get_next_moviment() {
     // Retorna posição em que o inimigo irá se mover
-    if(this.path.length === 0) return;
+    if(this.path.length == 0) return null;
+    if(this.canvas.frameCount % FRAMES_BETWEEN_MOVEMENT != 0) {
+      return null;
+    }
+    // Movimento liberado!
     return this.path.shift();
   }
 
