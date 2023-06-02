@@ -1,7 +1,10 @@
-import { Point } from "./Maze.js";
+import { Point } from "./Bomberman";
 
 export default class Cell {
-  constructor(point, type) {
+  point: Point;
+  type: string;
+
+  constructor(point: Point, type: string) {
     this.point = point;
     this.type = type;
   }
@@ -10,11 +13,11 @@ export default class Cell {
     return this.point.id;
   }
 
-  set_type(type) {
+  set_type(type: string) {
     this.type = type;
   }
 
-  get_color() {
+  get_color(): string {
     switch(this.type) {
       case "end-point":
         return "#009FBD"
@@ -29,11 +32,11 @@ export default class Cell {
     }
   }
 
-  is_obstacle() {
+  is_obstacle(): boolean {
     return this.type == "obstacle" || this.type == "fixed-obstacle";
   }
 
-  can_break() {
+  can_break(): boolean {
     return this.type != "fixed-obstacle";
   }
 }

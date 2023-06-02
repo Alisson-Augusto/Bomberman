@@ -1,0 +1,23 @@
+{
+  "name": "bomberman",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "compile": "tsc && webpack",
+    "server": "live-server",
+    "start": "npm run server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/p5": "^1.6.2",
+    "p5": "^1.6.0",
+    "ts-loader": "^9.4.3"
+  },
+  "devDependencies": {
+    "webpack-cli": "^5.1.1"
+  }
+}

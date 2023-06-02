@@ -1,5 +1,14 @@
+import p5 from "p5";
+import { Point } from "./Bomberman";
+
 export default class Bomb {
-  constructor(point, canvas) {
+  point: Point;
+  canvas: p5;
+  trails: Array<Point>;
+  time_explosion: number; // tempo até explodir
+  time_trail_hide: number;
+  
+  constructor(point: Point, canvas: p5) {
     this.point = point;
     this.canvas = canvas;
     this.trails = [];
@@ -28,7 +37,7 @@ export default class Bomb {
   }
 
 
-  draw_trails(trail) {
+  draw_trails(trail: Array<Point>) {
     this.trails = trail;
 
     for(let i=0; i < trail.length; i++) {
