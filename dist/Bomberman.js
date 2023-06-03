@@ -152,6 +152,7 @@ export default class Bomberman {
             console.info("inimigo sem alvo");
             return path;
         }
+        // TODO: Implementar DIJKSTRA para gerar path
         path = [
             new Point(1, 13),
             new Point(1, 12),
