@@ -2,17 +2,16 @@ export default class PriorityQueue {
     constructor() {
         this.heap = [];
     }
-    set_index(i, node) {
+    set_index(i, elem) {
         if (i < 1 || i > this.size()) {
             throw new Error(`Índice inválido: ${i}, size atual é ${this.size()}`);
         }
-        this.heap[i - 1] = node;
+        this.heap[i - 1] = elem;
     }
     get_index(i) {
         /*
           Para simplificar implementação
           o get_index assume indexação apartir de 1
-          para simplificar os métodos left, right
         */
         if (i < 1 || i > this.size()) {
             throw new Error(`Índice inválido: ${i}, size atual é ${this.size()}`);
@@ -43,7 +42,7 @@ export default class PriorityQueue {
         */
         let insert_element = this.size();
         let p = this.parent(insert_element);
-        while (this.get_index(p).distance > this.get_index(insert_element).distance) {
+        while (this.get_index(p).value > this.get_index(insert_element).value) {
             this.swap(p, insert_element);
             insert_element = p;
             p = this.parent(insert_element);
@@ -61,10 +60,10 @@ export default class PriorityQueue {
             let left_child = this.left(last_element);
             let right_child = this.right(last_element);
             let smaller = last_element; // indíce do menor elemento na heap
-            if (left_child <= this.size() && this.get_index(left_child).distance < this.get_index(smaller).distance) {
+            if (left_child <= this.size() && this.get_index(left_child).value < this.get_index(smaller).value) {
                 smaller = left_child;
             }
-            if (right_child <= this.size() && this.get_index(right_child).distance < this.get_index(smaller).distance) {
+            if (right_child <= this.size() && this.get_index(right_child).value < this.get_index(smaller).value) {
                 smaller = right_child;
             }
             if (last_element == smaller) {

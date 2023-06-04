@@ -1,27 +1,29 @@
-import { Node } from "../Dijkstra";
+export interface Comparable {
+  value: number;
+}
+
 
 export default class PriorityQueue {
 
-  private heap: Node[];
+  private heap: Comparable[];
   
   constructor() {
     this.heap = [];
   }
 
 
-  private set_index(i: number, node: Node): void {
+  private set_index(i: number, elem: Comparable): void {
     if(i < 1 || i > this.size()){
       throw new Error(`Índice inválido: ${i}, size atual é ${this.size()}`);
     }
-    this.heap[i - 1] = node;
+    this.heap[i - 1] = elem;
   }
 
 
-  private get_index(i: number): Node {
+  private get_index(i: number): Comparable {
     /* 
       Para simplificar implementação
       o get_index assume indexação apartir de 1
-      para simplificar os métodos left, right
     */
     if(i < 1 || i > this.size()){
       throw new Error(`Índice inválido: ${i}, size atual é ${this.size()}`);
@@ -30,7 +32,7 @@ export default class PriorityQueue {
   }
 
 
-  insert(value: Node) {
+  insert(value: Comparable) {
     // Insere como último elemento da árvore
     this.heap.push(value);
     if(this.size() > 1) {
@@ -39,7 +41,7 @@ export default class PriorityQueue {
   }
 
 
-  extract_min(): Node | undefined {
+  extract_min(): Comparable | undefined {
     if(this.size() == 0) return undefined;
 
     let min = this.get_index(1);
@@ -58,7 +60,7 @@ export default class PriorityQueue {
     */
     let insert_element = this.size();
     let p = this.parent(insert_element);
-    while(this.get_index(p).distance > this.get_index(insert_element).distance) {
+    while(this.get_index(p).value > this.get_index(insert_element).value) {
       this.swap(p, insert_element);
       insert_element = p;
       p = this.parent(insert_element);
@@ -80,11 +82,11 @@ export default class PriorityQueue {
       let right_child = this.right(last_element);
 
       let smaller = last_element; // indíce do menor elemento na heap
-      if(left_child <= this.size() && this.get_index(left_child).distance < this.get_index(smaller).distance) {
+      if(left_child <= this.size() && this.get_index(left_child).value < this.get_index(smaller).value) {
         smaller = left_child;
       }
 
-      if(right_child <= this.size() && this.get_index(right_child).distance < this.get_index(smaller).distance) {
+      if(right_child <= this.size() && this.get_index(right_child).value < this.get_index(smaller).value) {
         smaller = right_child;
       }
 

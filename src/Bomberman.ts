@@ -4,7 +4,7 @@ import Cell from "./Cell.js";
 import Player from "./Player.js";
 import Enemy from "./Enemy.js";
 import MAP from "./Scene1.js";
-import { adjacent_list } from "./Dijkstra";
+import Dijkstra, { adjacent_list, Node } from "./Dijkstra";
 
 const RIGHT  = 68;
 const LEFT   = 65;
@@ -152,16 +152,11 @@ export default class Bomberman {
       return path;
     }
 
-    // TODO: Implementar DIJKSTRA para gerar path
-    path = [
-      new Point(1, 13),
-      new Point(1, 12),
-      new Point(1, 11),
-      new Point(1, 10),
-      new Point(2, 10),
-      new Point(3, 10),
-      new Point(4, 10),
-    ]
+    let source = new Node(enemy);
+    source.distance = 0;
+    source.value = 0;
+    
+    Dijkstra(this, source);
     
     return path;
   }
@@ -177,8 +172,8 @@ export default class Bomberman {
     if(this.show_lables) {
       this.canvas.fill(this.canvas.color(0,0,0));
       this.canvas.text(
-          `${line},${column}`,
-          column * this.cell_size + 5,
+          `${cell.get_id()}`,
+          column * this.cell_size + 15,
           line   * this.cell_size + (this.cell_size / 2))
     }
   }

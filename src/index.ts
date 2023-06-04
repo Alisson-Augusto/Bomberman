@@ -4,9 +4,6 @@ Arestas  = regiões disponíveis que se conectam
 */
 import p5 from "p5";
 import Bomberman, { Point } from "./Bomberman";
-import PriorityQueue from "./data_structures/PriorityQueue";
-import Cell from "./Cell";
-import { Node } from "./Dijkstra";
 
 let WIDTH  = 640;
 let HEIGHT = 520;

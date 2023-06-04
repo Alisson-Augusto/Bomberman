@@ -21,6 +21,8 @@ export default class Cell {
     switch(this.type) {
       case "end-point":
         return "#009FBD"
+      case "taken-path":
+        return "#009FBD"
       case "available-path":
         return "#ffffff"
       case "obstacle":
@@ -33,7 +35,7 @@ export default class Cell {
   }
 
   is_obstacle(): boolean {
-    return this.type == "obstacle" || this.type == "fixed-obstacle";
+    return this.type == "fixed-obstacle";
   }
 
   can_break(): boolean {
