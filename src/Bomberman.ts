@@ -4,6 +4,7 @@ import Cell from "./Cell.js";
 import Player from "./Player.js";
 import Enemy from "./Enemy.js";
 import MAP from "./Scene1.js";
+import { adjacent_list } from "./Dijkstra";
 
 const RIGHT  = 68;
 const LEFT   = 65;
@@ -11,8 +12,8 @@ const BOTTOM = 83;
 const TOP    = 87;
 const SPACE  = 32;
 const DEBUG_KEY = 76;
-const CELLS_VERTICAL   = 13;
-const CELLS_HORIZONTAL = 16;
+export const CELLS_VERTICAL   = 13;
+export const CELLS_HORIZONTAL = 16;
 
 export class Point {
   id: number;
@@ -25,7 +26,6 @@ export class Point {
     this.column = column;
   }
 }
-
 
 function create_cell(type: number, point:Point, bomberman:Bomberman): Cell {
   /*
@@ -104,7 +104,7 @@ export default class Bomberman {
   }
 
 
-  init_enemies() {
+  init_enemies(): void {
     /* Inicializa inimigos, definindo alvos */
     for(let i=0; i < this.enemies.length; i++) {
       if(this.player == undefined) continue;
@@ -117,7 +117,7 @@ export default class Bomberman {
   }
 
 
-  load_maze_from_matrix(matrix: Array<Array<number>>) {
+  load_maze_from_matrix(matrix: Array<Array<number>>): void {
     // Carrega mapa apartir de uma matriz de inteiros
     if(matrix.length != CELLS_VERTICAL || matrix[0].length != CELLS_HORIZONTAL) {
       console.error("Matriz de tamanho incompatível")
@@ -136,58 +136,12 @@ export default class Bomberman {
   }
 
 
-  render_maze() {
+  render_maze(): void {
     for(let i=0; i < CELLS_VERTICAL; i++) {
       for(let j=0; j < CELLS_HORIZONTAL; j++) {
         this.render_cell(i, j);
       }
     }
-  }
-
-
-  get_adjacent_list() {
-    /*
-    * Retorna lista de adjacência com todas as células
-    * usando como base a matriz de células `this.cells`
-    */
-    let grafo = Array(CELLS_VERTICAL * CELLS_HORIZONTAL);
-    let c = 0;
-    for(let i=0; i < CELLS_VERTICAL; i++) {
-      for(let j=0; j < CELLS_HORIZONTAL; j++) {
-        // Varre todos os adjacêntes a célula
-        let current_cell = this.get_cell(i, j);
-        if(current_cell.is_obstacle()) continue;
-        
-        let adjacent = []
-        // Vértice direita
-        let right = j+1;
-        if(right <= CELLS_HORIZONTAL && this.get_cell(i, right).is_obstacle() == false) {
-          adjacent.push(this.get_cell(i, right));
-        }
-        
-        // Vértice esquerda
-        let left = j-1;
-        if(left >= 0 && this.get_cell(i, left).is_obstacle() == false) {
-          adjacent.push(this.get_cell(i, left));
-        }
-        
-        // Vértice cima
-        let up = i-1;
-        if(up >= 0 && this.get_cell(up, j).is_obstacle() == false) {
-          adjacent.push(this.get_cell(up, j));
-        }
-        
-        // Vértice baixo
-        let bottom = i+1;
-        if(bottom <= CELLS_VERTICAL && this.get_cell(bottom, j).is_obstacle() == false) {
-          adjacent.push(this.get_cell(bottom, j));
-        }
-
-        grafo[c] = adjacent;
-        c++;
-      }
-    }
-    return grafo;
   }
 
 
@@ -338,11 +292,12 @@ export default class Bomberman {
     if(this.canvas.keyCode == DEBUG_KEY) {
       this.show_lables = !this.show_lables;
       this.render_maze();
-      console.table(this.get_adjacent_list());
+      console.table(adjacent_list(this));
     }
 
     this.handle_moviment();
   }
+
 
   is_valid_move(position: Point) {
     /* Valida se ator pode se mover para essa célula */
