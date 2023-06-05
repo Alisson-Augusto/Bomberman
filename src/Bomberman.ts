@@ -347,6 +347,8 @@ export default class Bomberman {
       this.set_cell_from_type(this.player.point, 0);
       this.set_cell(next_point, this.player);
       this.player.point = next_point;
+
+      this.init_enemies();
     }
   }
 
@@ -393,6 +395,12 @@ export default class Bomberman {
       this.set_cell_from_type(this.enemies[i].point, 0);
       this.set_cell(position, this.enemies[i]);
       this.enemies[i].point = position;
+
+      if(this.show_lables) { // Desenha caminhos para debug
+        this.enemies[i].path.forEach(p => {
+          this.set_cell(p, new Cell(p, "taken-path"));
+        })
+      }
     } 
   }
 }

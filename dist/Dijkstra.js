@@ -9,6 +9,7 @@ export class Node {
     calculate_distance() {
         switch (this.cell.type) {
             case "available-path":
+            case "taken-path":
             case "charactere":
                 return 1;
             case "obstacle":
@@ -151,7 +152,6 @@ export default function Dijkstra(game, s, target) {
         if (p == undefined)
             break;
         path.push(p.cell.point);
-        p.cell.set_type("taken-path");
     }
     return path;
 }

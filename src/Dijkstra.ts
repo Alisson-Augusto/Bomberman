@@ -19,6 +19,7 @@ export class Node implements Comparable{
   private calculate_distance(): number {
     switch(this.cell.type) {
       case "available-path":
+      case "taken-path":
       case "charactere":
         return 1;
       case "obstacle":
@@ -185,7 +186,6 @@ export default function Dijkstra(game: Bomberman, s: Node, target: Point): Point
     p = p.parent;
     if(p == undefined) break;
     path.push(p.cell.point);
-    p.cell.set_type("taken-path");
   }
   return path;
 }
