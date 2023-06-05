@@ -116,7 +116,7 @@ export default class Bomberman {
         let source = new Node(enemy);
         source.distance = 0;
         source.value = 0;
-        Dijkstra(this, source);
+        path = Dijkstra(this, source, enemy.target).reverse();
         return path;
     }
     render_cell(line, column) {

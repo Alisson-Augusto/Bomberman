@@ -95,67 +95,64 @@ function extract_nodes(game, s) {
     nodes[s.id] = s;
     return nodes;
 }
-function relax(u, adjacent, nodes) {
+function relax(u_id, adjacent_id, nodes) {
+    let u = nodes[u_id];
+    let adjacent = nodes[adjacent_id];
     if (u.value + adjacent.distance < adjacent.value) {
         adjacent.value = u.value + adjacent.distance;
         adjacent.parent = u;
-        for (let i = 0; i < nodes.length; i++) {
-            if (nodes[i].id == adjacent.id) {
-                nodes[i] = adjacent;
-                break;
-            }
-        }
+        nodes[adjacent_id] = adjacent;
     }
 }
-function extract_min(nodes) {
+function extract_min(nodes, extracted_nodes) {
+    if (nodes.length == 0)
+        return undefined;
     let min_value = Infinity;
-    let min;
     let index = -1;
+    let min;
     for (let i = 0; i < nodes.length; i++) {
+        // Ignora nós já visitados
+        if (extracted_nodes.find(node_id_visited => node_id_visited == nodes[i].id)) {
+            continue;
+        }
         if (nodes[i].value < min_value) {
             min_value = nodes[i].value;
             min = nodes[i];
             index = i;
         }
     }
-    if (index != -1) {
-        nodes.splice(index, 1);
-    }
+    if (index == -1)
+        return undefined;
+    extracted_nodes.push(nodes[index].id);
     return min;
 }
-export default function Dijkstra(game, s) {
+export default function Dijkstra(game, s, target) {
     let G = adjacent_list(game);
     let nodes = extract_nodes(game, s);
-    let p = null;
+    let extracted_nodes = [];
     while (true) {
-        let u = extract_min(nodes);
+        let u = extract_min(nodes, extracted_nodes);
         if (nodes.length == 0 || u == undefined)
             break;
-        // console.log(`Extract-min: ${u.id}, value: ${u.value}`);
         for (let i = 0; i < G[u.id].length; i++) {
             let adjacent = G[u.id][i];
-            // console.log(adjacent)
-            if (!nodes.find(node => node.id == adjacent.id)) {
-                if (nodes.length != 0) {
-                    continue;
-                }
+            if (extracted_nodes.find(node_id_visited => node_id_visited == adjacent.id)) {
+                continue;
             }
-            else {
-                console.log(nodes.find(node => node.id == adjacent.id));
-            }
-            // console.log(`Olhando para adjacente do ${u.id} -> ${adjacent.id}`);
-            relax(u, adjacent, nodes);
-            if (u.cell.type == "charactere") {
-                p = u;
-            }
+            relax(u.id, adjacent.id, nodes);
         }
     }
-    console.log(p);
+    let p = nodes[target.id];
+    let path = [];
     while (true) {
         if (p == null)
             break;
         p = p.parent;
-        p === null || p === void 0 ? void 0 : p.cell.set_type("taken-path");
+        if (p == undefined)
+            break;
+        path.push(p.cell.point);
+        p.cell.set_type("taken-path");
     }
+    return path;
 }
 //# sourceMappingURL=Dijkstra.js.map
