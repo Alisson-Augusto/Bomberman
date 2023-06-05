@@ -52,7 +52,7 @@ function create_cell(type: number, point:Point, bomberman:Bomberman): Cell {
       bomberman.player = new Player(point)
       return bomberman.player;
     case 4:
-      let enemy = new Enemy(point, bomberman.canvas);
+      let enemy = new Enemy(point, bomberman.canvas, bomberman);
       bomberman.enemies.push(enemy)
       return enemy;
     default:
@@ -179,20 +179,20 @@ export default class Bomberman {
   }
 
   
-  add_bomb(point: Point) {
+  add_bomb(point: Point, originate: Cell) {
     // Valida se já existe uma bomba na posição
     for(let i=0; i < this.bombs.length; i++) {
       if(this.bombs[i].point.id === point.id) {
         return;
       }
     }
-    let bomb = new Bomb(point, this.canvas);
+    let bomb = new Bomb(point, originate, this.canvas);
     this.bombs.push(bomb);
   }
 
   
-  explosion(point: Point) {
-    let {line, column} = point;
+  explosion(bomb: Bomb) {
+    let {line, column} = bomb.point;
     // quantidade de blocos que serão afetados na vertical/horizontal
     let propagation = 2;
     let points = [];
@@ -243,6 +243,13 @@ export default class Bomberman {
     }
 
     for(let i=0; i < points.length; i++) {
+      if(bomb.originate.type == "enemy") {
+        // Inimigo não é afetado pela própria bomba
+        if(points[i].id == bomb.originate.point.id) {
+          continue;
+        }
+      }
+
       this.hit_detection(points[i])
       this.set_cell_from_type(points[i], 0);
     }
@@ -282,7 +289,7 @@ export default class Bomberman {
     if(this.player == undefined) return;
 
     if(this.canvas.keyCode == SPACE) {
-      this.add_bomb(this.player.point);
+      this.add_bomb(this.player.point, this.player);
     }
     if(this.canvas.keyCode == DEBUG_KEY) {
       this.show_lables = !this.show_lables;
@@ -368,7 +375,7 @@ export default class Bomberman {
     for(let i=0; i < this.bombs.length; i++) {
       if(this.bombs[i].has_exploded()) {
         // Bomba acabou de explodir
-        let trail = this.explosion(this.bombs[i].point);
+        let trail = this.explosion(this.bombs[i]);
         this.bombs[i].draw_trails(trail);
         
         let {line, column} = this.bombs[i].point;
@@ -390,7 +397,7 @@ export default class Bomberman {
     // Movimentação dos inimigos
     for(let i=0; i < this.enemies.length; i++) {
       let position = this.enemies[i].get_next_moviment()
-      if(position == undefined || !this.is_valid_position(position.line, position.column)) continue;
+      if(position == undefined || !this.is_valid_move(position)) continue;
 
       this.set_cell_from_type(this.enemies[i].point, 0);
       this.set_cell(position, this.enemies[i]);

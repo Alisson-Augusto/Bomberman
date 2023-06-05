@@ -1,6 +1,7 @@
 export default class Bomb {
-    constructor(point, canvas) {
+    constructor(point, originate, canvas) {
         this.point = point;
+        this.originate = originate;
         this.canvas = canvas;
         this.trails = [];
         this.time_explosion = Date.now() + 3000; // tempo até explodir

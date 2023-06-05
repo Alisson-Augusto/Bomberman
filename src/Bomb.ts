@@ -1,15 +1,18 @@
 import p5 from "p5";
 import { Point } from "./Bomberman";
+import Cell from "./Cell";
 
 export default class Bomb {
   point: Point;
   canvas: p5;
+  originate: Cell;
   trails: Array<Point>;
   time_explosion: number; // tempo até explodir
   time_trail_hide: number;
   
-  constructor(point: Point, canvas: p5) {
+  constructor(point: Point, originate: Cell, canvas: p5) {
     this.point = point;
+    this.originate = originate; 
     this.canvas = canvas;
     this.trails = [];
     this.time_explosion = Date.now() + 3000; // tempo até explodir
