@@ -106,6 +106,7 @@ export default class Bomberman {
 
   init_enemies(): void {
     /* Inicializa inimigos, definindo alvos */
+    console.log("Calculando caminho do inimigo ao player");
     for(let i=0; i < this.enemies.length; i++) {
       if(this.player == undefined) continue;
 
@@ -299,7 +300,8 @@ export default class Bomberman {
       return false;
     }
 
-    if(this.get_cell(position.line, position.column).type == "available-path") {
+    let cell_type = this.get_cell(position.line, position.column).type;
+    if(cell_type != "obstacle" && cell_type != "fixed-obstacle") {
       return true;
     }
 
@@ -383,6 +385,7 @@ export default class Bomberman {
       }
     }
 
+    // Movimentação dos inimigos
     for(let i=0; i < this.enemies.length; i++) {
       let position = this.enemies[i].get_next_moviment()
       if(position == undefined || !this.is_valid_position(position.line, position.column)) continue;
