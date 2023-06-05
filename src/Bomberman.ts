@@ -73,7 +73,7 @@ export default class Bomberman {
   cells: Array<Array<Cell>>;
   show_lables: boolean;
   is_game_running: boolean;
-
+  player_win: boolean;
 
   constructor(canvas: p5, width: number, height: number, font: string) {
     this.canvas = canvas;
@@ -87,6 +87,7 @@ export default class Bomberman {
     this.cells = Array(CELLS_VERTICAL);
     this.show_lables = false;
     this.is_game_running = true;
+    this.player_win = false;
     this.validate_canvas_size();
     this.load_maze_from_matrix(MAP);
     this.init_enemies();
@@ -105,15 +106,12 @@ export default class Bomberman {
 
 
   init_enemies(): void {
-    /* Inicializa inimigos, definindo alvos */
-    console.log("Calculando caminho do inimigo ao player");
+    /* Inicializa inimigos, definindo alvos e calculando caminho até o player */
     for(let i=0; i < this.enemies.length; i++) {
       if(this.player == undefined) continue;
 
       this.enemies[i].set_target(this.player.point);
-      this.enemies[i].set_path(
-        this.generate_path_from_enemy_to_target(this.enemies[i])
-      )
+      this.enemies[i].set_path(this.generate_path_from_enemy_to_target(this.enemies[i]))
     }
   }
 
@@ -146,7 +144,7 @@ export default class Bomberman {
   }
 
 
-  generate_path_from_enemy_to_target(enemy: Enemy) {
+  generate_path_from_enemy_to_target(enemy: Enemy): Point[] {
     let path:Array<Point> = [];
     if(enemy.target == null) { 
       console.info("inimigo sem alvo");  
@@ -259,10 +257,23 @@ export default class Bomberman {
 
 
   hit_detection(point: Point) {
+    if(this.player == undefined) return;
     // Detecta se houve colisão com player ou inimigo
-    if(this.player != undefined && this.player.point.id == point.id) {
+    if(this.player.point.id == point.id) {
       this.is_game_running = false;
-    } 
+    }
+
+    for(let i=0; i < this.enemies.length; i++) {
+      if(this.enemies[i].get_id() == point.id) {
+        // Bomba acertou um inimigo
+        this.enemies.splice(i, 1);
+        if(this.enemies.length == 0) { // Player matou todos os inimigos
+          this.player_win = true;
+          this.is_game_running = false;
+        }
+        break;
+      }
+    }
   }
 
 
@@ -350,7 +361,7 @@ export default class Bomberman {
     }
 
     let next_point = new Point(n_line, n_column);
-    if(this.is_valid_move(next_point)) {
+    if(this.is_valid_move(next_point) && this.get_cell(n_line, n_column).type != "enemy") {
       this.set_cell_from_type(this.player.point, 0);
       this.set_cell(next_point, this.player);
       this.player.point = next_point;
@@ -363,7 +374,13 @@ export default class Bomberman {
   update() {
     if(!this.is_game_running) {
       let font_size = 60;
-      let text = "GAME OVER";
+      let text = "";
+      if(this.player_win) {
+        text = "YOU WIN!";
+      }
+      else {
+        text = "GAME OVER";
+      }
       this.canvas.textSize(font_size);
       this.canvas.textFont(this.font);
       this.canvas.stroke(1);

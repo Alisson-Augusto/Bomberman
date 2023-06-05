@@ -17,17 +17,17 @@ export default class Enemy extends Cell {
     }
     get_next_moviment() {
         // Retorna posição em que o inimigo irá se mover
-        if (this.path.length == 0)
+        if (this.path.length == 0 || this.bomberman.player == undefined)
             return undefined;
         if (this.canvas.frameCount % FRAMES_BETWEEN_MOVEMENT != 0) {
             return undefined;
         }
-        if (this.bomberman.is_valid_move(this.path[0])) {
+        let player_on_path = this.path[0].id == this.bomberman.player.get_id();
+        if (this.bomberman.is_valid_move(this.path[0]) && !player_on_path) {
             // Movimento liberado!
             return this.path.shift();
         }
         // Caminho esta obstruído
-        console.log("Inimigo lança bomba!");
         this.bomberman.add_bomb(this.point, this);
         return undefined;
     }

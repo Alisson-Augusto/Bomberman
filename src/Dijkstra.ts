@@ -181,6 +181,10 @@ export default function Dijkstra(game: Bomberman, s: Node, target: Point): Point
   
   let p: Node | null = nodes[target.id];
   let path = [];
+  if(p.value != Infinity) {
+    path.push(p.cell.point);
+  }
+
   while(true) {
     if(p == null) break;
     p = p.parent;

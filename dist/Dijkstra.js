@@ -145,6 +145,9 @@ export default function Dijkstra(game, s, target) {
     }
     let p = nodes[target.id];
     let path = [];
+    if (p.value != Infinity) {
+        path.push(p.cell.point);
+    }
     while (true) {
         if (p == null)
             break;
