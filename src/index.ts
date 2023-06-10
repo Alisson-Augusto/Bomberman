@@ -2,15 +2,15 @@
 Vértices = regiões do mapa (Células) disponíveis para se mover
 Arestas  = regiões disponíveis que se conectam
 */
-import p5 from "p5";
+import p5, { Font } from "p5";
 import Bomberman, { Point } from "./Bomberman";
 
 let WIDTH  = 640;
 let HEIGHT = 520;
-let default_font: string;
+let default_font: Font;
 let bomberman: Bomberman;
 
-let canvas = new p5(function(p5) {
+let canvas = new p5(function(p5: p5) {
   p5.preload = function preload() {
     default_font = p5.loadFont('font/PressStart2P-Regular.ttf');
   }

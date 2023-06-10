@@ -1,7 +1,11 @@
 import Bomberman, { CELLS_HORIZONTAL, CELLS_VERTICAL, Point } from "./Bomberman";
 import Cell from "./Cell";
-import Enemy from "./Enemy";
-import { Comparable } from "./data_structures/PriorityQueue";
+
+
+export interface Comparable {
+  value: number;
+}
+
 
 export class Node implements Comparable{
   cell: Cell;

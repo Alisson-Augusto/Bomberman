@@ -1,6 +1,6 @@
 import Cell from "./Cell.js";
 // Define quantidade de frames necessário para liberar movimentação
-const FRAMES_BETWEEN_MOVEMENT = 30;
+const FRAMES_BETWEEN_MOVEMENT = 15;
 export default class Enemy extends Cell {
     constructor(point, canvas, bomberman, target = undefined) {
         super(point, "enemy");

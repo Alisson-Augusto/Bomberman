@@ -1,5 +1,5 @@
 import Bomb from "./Bomb.js";
-import p5 from "p5";
+import p5, { Font } from "p5";
 import Cell from "./Cell.js";
 import Player from "./Player.js";
 import Enemy from "./Enemy.js";
@@ -65,7 +65,7 @@ export default class Bomberman {
   canvas: p5;
   width: number;
   height: number;
-  font: string;
+  font: Font;
   cell_size: number;
   bombs: Array<Bomb>;
   enemies: Array<Enemy>;
@@ -75,7 +75,7 @@ export default class Bomberman {
   is_game_running: boolean;
   player_win: boolean;
 
-  constructor(canvas: p5, width: number, height: number, font: string) {
+  constructor(canvas: p5, width: number, height: number, font: Font) {
     this.canvas = canvas;
     this.width  = width;
     this.height = height;
@@ -189,18 +189,22 @@ export default class Bomberman {
   }
 
   
-  explosion(bomb: Bomb) {
+  explosion(bomb: Bomb): Point[] {
     let {line, column} = bomb.point;
     // quantidade de blocos que serão afetados na vertical/horizontal
     let propagation = 2;
     let points = [];
-    let p;
 
     // horizontal - esquerda
     let left  = Math.max(0, column-propagation);
     for(let j=column; j >= left; j--) {
-      p = new Point(line, j);
+      let p = new Point(line, j);
       if(!this.get_cell(line, j).can_break()) {
+        break;
+      }
+
+      if(this.get_cell(line, j).type == "obstacle") {
+        points.push(p);
         break;
       }
 
@@ -210,8 +214,13 @@ export default class Bomberman {
     // horizontal - direita
     let right = Math.min(CELLS_HORIZONTAL, column+propagation);
     for(let j=column; j <= right; j++) {
-      p = new Point(line, j);
+      let p = new Point(line, j);
       if(!this.get_cell(line, j).can_break()) {
+        break;
+      }
+
+      if(this.get_cell(line, j).type == "obstacle") {
+        points.push(p);
         break;
       }
       
@@ -221,8 +230,13 @@ export default class Bomberman {
     // vertical - cima
     let up = Math.max(0, line-propagation);
     for(let i=line; i >= up; i--) {
-      p = new Point(i, column);
+      let p = new Point(i, column);
       if(!this.get_cell(i, column).can_break()) {
+        break;
+      }
+
+      if(this.get_cell(i, column).type == "obstacle") {
+        points.push(p);
         break;
       }
 
@@ -232,8 +246,13 @@ export default class Bomberman {
     // vertical - baixo
     let down = Math.min(CELLS_VERTICAL, line+propagation);
     for(let i=line; i <= down; i++) {
-      p = new Point(i, column);
+      let p = new Point(i, column);
       if(!this.get_cell(i, column).can_break()) {
+        break;
+      }
+
+      if(this.get_cell(i, column).type == "obstacle") {
+        points.push(p);
         break;
       }
 
@@ -365,8 +384,6 @@ export default class Bomberman {
       this.set_cell_from_type(this.player.point, 0);
       this.set_cell(next_point, this.player);
       this.player.point = next_point;
-
-      this.init_enemies();
     }
   }
 
@@ -387,17 +404,23 @@ export default class Bomberman {
       this.canvas.fill(this.canvas.color(255, 255, 255));
       this.canvas.text(text, this.width/2 - (text.length * font_size) / 2, this.height/2);
       return;
-    } 
+    }
+
+    if(this.canvas.frameCount % 60 == 0) {
+      console.log("Calculando novo caminho mínimo dos inimigos");
+      this.init_enemies();
+    }
 
     for(let i=0; i < this.bombs.length; i++) {
-      if(this.bombs[i].has_exploded()) {
+      if(this.bombs[i].has_exploded() && this.bombs[i].trails.length == 0) {
         // Bomba acabou de explodir
         let trail = this.explosion(this.bombs[i]);
         this.bombs[i].draw_trails(trail);
         
         let {line, column} = this.bombs[i].point;
         this.render_cell(line, column);
-      }else {
+      }
+      if(!this.bombs[i].has_exploded()){
         this.bombs[i].draw();
       }
 

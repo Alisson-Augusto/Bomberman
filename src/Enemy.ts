@@ -3,7 +3,7 @@ import Bomberman, { Point } from "./Bomberman.js";
 import Cell from "./Cell.js";
 
 // Define quantidade de frames necessário para liberar movimentação
-const FRAMES_BETWEEN_MOVEMENT:number = 30;
+const FRAMES_BETWEEN_MOVEMENT:number = 15;
 
 export default class Enemy extends Cell {
   path: Array<Point>;
