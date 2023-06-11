@@ -60,7 +60,6 @@ function create_cell(type: number, point:Point, bomberman:Bomberman): Cell {
   }
 }
 
-
 export default class Bomberman {
   canvas: p5;
   width: number;
@@ -409,6 +408,10 @@ export default class Bomberman {
     if(this.canvas.frameCount % 60 == 0) {
       console.log("Calculando novo caminho mínimo dos inimigos");
       this.init_enemies();
+
+      if(this.show_lables) {
+        this.render_maze() // "limpa" canvas, para remover caminhos mínimos mostrados para debug
+      }
     }
 
     for(let i=0; i < this.bombs.length; i++) {
@@ -433,19 +436,24 @@ export default class Bomberman {
         this.bombs.shift();
       }
     }
-
+    
     // Movimentação dos inimigos
     for(let i=0; i < this.enemies.length; i++) {
       let position = this.enemies[i].get_next_moviment()
       if(position == undefined || !this.is_valid_move(position)) continue;
-
+      
       this.set_cell_from_type(this.enemies[i].point, 0);
       this.set_cell(position, this.enemies[i]);
       this.enemies[i].point = position;
 
       if(this.show_lables) { // Desenha caminhos para debug
         this.enemies[i].path.forEach(p => {
-          this.set_cell(p, new Cell(p, "taken-path"));
+          let {column, line} = p;
+          this.canvas.fill(this.enemies[i].get_color());
+          this.canvas.circle(
+            column * 40 + 20,
+            line   * 40 + 20,
+            40*0.35)
         })
       }
     } 

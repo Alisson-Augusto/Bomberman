@@ -3,13 +3,21 @@ import Bomberman, { Point } from "./Bomberman.js";
 import Cell from "./Cell.js";
 
 // Define quantidade de frames necessário para liberar movimentação
-const FRAMES_BETWEEN_MOVEMENT:number = 15;
+const FRAMES_BETWEEN_MOVEMENT:number = 20;
+
+function get_random_color(): string {
+  let colors = ["#316650", "#537188", "#FC4F00", "#FF6000"];
+  let index = Math.floor(Math.random() * colors.length);
+  return colors[index];
+}
+
 
 export default class Enemy extends Cell {
   path: Array<Point>;
   target?: Point;
   canvas: p5;
   bomberman: Bomberman;
+  color: string;
 
   constructor(point: Point, canvas: p5, bomberman: Bomberman, target=undefined) {
     super(point, "enemy");
@@ -17,6 +25,7 @@ export default class Enemy extends Cell {
     this.target = target;
     this.canvas = canvas;
     this.bomberman = bomberman;
+    this.color = get_random_color();
   }
 
   set_path(path: Array<Point>) {
@@ -46,6 +55,6 @@ export default class Enemy extends Cell {
   }
 
   get_color() {
-    return "#316650";
+    return this.color;
   }
 }

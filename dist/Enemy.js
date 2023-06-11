@@ -1,6 +1,11 @@
 import Cell from "./Cell.js";
 // Define quantidade de frames necessário para liberar movimentação
-const FRAMES_BETWEEN_MOVEMENT = 15;
+const FRAMES_BETWEEN_MOVEMENT = 20;
+function get_random_color() {
+    let colors = ["#316650", "#537188", "#FC4F00", "#FF6000"];
+    let index = Math.floor(Math.random() * colors.length);
+    return colors[index];
+}
 export default class Enemy extends Cell {
     constructor(point, canvas, bomberman, target = undefined) {
         super(point, "enemy");
@@ -8,6 +13,7 @@ export default class Enemy extends Cell {
         this.target = target;
         this.canvas = canvas;
         this.bomberman = bomberman;
+        this.color = get_random_color();
     }
     set_path(path) {
         this.path = path;
@@ -32,7 +38,7 @@ export default class Enemy extends Cell {
         return undefined;
     }
     get_color() {
-        return "#316650";
+        return this.color;
     }
 }
 //# sourceMappingURL=Enemy.js.map
