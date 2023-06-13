@@ -1,6 +1,6 @@
 import Cell from "./Cell.js";
 // Define quantidade de frames necessário para liberar movimentação
-const FRAMES_BETWEEN_MOVEMENT = 20;
+const FRAMES_BETWEEN_MOVEMENT = 15;
 function get_random_color() {
     let colors = ["#316650", "#537188", "#FC4F00", "#FF6000"];
     let index = Math.floor(Math.random() * colors.length);

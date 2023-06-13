@@ -3,7 +3,7 @@ import Bomberman, { Point } from "./Bomberman.js";
 import Cell from "./Cell.js";
 
 // Define quantidade de frames necessário para liberar movimentação
-const FRAMES_BETWEEN_MOVEMENT:number = 20;
+const FRAMES_BETWEEN_MOVEMENT:number = 15;
 
 function get_random_color(): string {
   let colors = ["#316650", "#537188", "#FC4F00", "#FF6000"];
