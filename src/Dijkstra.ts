@@ -171,14 +171,10 @@ export default function Dijkstra(game: Bomberman, s: Node, target: Point): Point
   while(true) {
     let u = extract_min(nodes, extracted_nodes);
 
-    if(nodes.length == 0 || u == undefined) break;
+    if(u == undefined) break;
 
     for(let i=0; i < G[u.id].length; i++) {
       let adjacent = G[u.id][i];
-      if(extracted_nodes.find(node_id_visited => node_id_visited == adjacent.id)) {
-        continue;
-      }
-
       relax(u.id, adjacent.id, nodes);
     }
   }
